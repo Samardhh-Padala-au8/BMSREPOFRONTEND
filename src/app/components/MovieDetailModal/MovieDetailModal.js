@@ -11,11 +11,10 @@ import {
   InputNumber,
   message,
 } from "antd";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { client } from "../../../client";
 import { ColorRing } from "react-loader-spinner";
 import images from "../../utils/images";
-import { useForm } from "rc-field-form";
 const { Option } = Select;
 export const MovieDetailModal = ({
   isModalOpen,
