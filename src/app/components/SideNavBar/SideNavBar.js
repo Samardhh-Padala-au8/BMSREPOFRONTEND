@@ -12,6 +12,11 @@ export function SideNavBar() {
       icon: images.movie,
       route: "/",
     },
+    {
+      text: "Events",
+      icon: null,
+      route: "/event",
+    },
   ];
   return (
     <div className={"side-nav-container"}>
@@ -33,21 +38,33 @@ export function SideNavBar() {
           </div>
         </div>
         <div className="nav-menu">
-          {menuItems.map(({ text, icon }) => (
-            <div onClick={() => history("/")}>
+          {menuItems.map(({ text, icon, route }) => (
+            <div onClick={() => history(route)}>
               <div className={"menu-item"} href="#">
-                <img
-                  src={icon}
-                  alt=""
-                  srcset=""
-                  style={{
-                    width: "40px",
-                    height: "40px",
-                    marginTop: "0.3rem",
-                    paddingLeft: "0.5rem",
-                    marginRight: "0.4rem",
-                  }}
-                />
+                {icon ? (
+                  <img
+                    src={icon}
+                    alt=""
+                    srcset=""
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                      marginTop: "0.3rem",
+                      paddingLeft: "0.5rem",
+                      marginRight: "0.4rem",
+                    }}
+                  />
+                ) : (
+                  <i
+                    class="fa-thin fa-calendar"
+                    style={{
+                      fontSize: "30px",
+                      marginBottom: "100px",
+                      paddingLeft: "0.8rem",
+                      marginRight: "0.8rem",
+                    }}
+                  ></i>
+                )}
                 <Typography.Text
                   style={{ color: "white", marginTop: "0.9rem" }}
                 >

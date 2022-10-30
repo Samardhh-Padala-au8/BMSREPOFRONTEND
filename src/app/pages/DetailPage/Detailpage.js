@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom";
 import { SideNavBar } from "../../components";
 import { useEffect, useState } from "react";
 import { Select } from "antd";
+import { Tag } from "antd";
 import { client, urlFor } from "../../../client";
 export function Detailpage() {
   const { id } = useParams();
@@ -11,12 +12,11 @@ export function Detailpage() {
   const { Option } = Select;
 
   useEffect(() => {
-    console.log(id);
     const query = `*[_type=='movies'&& _id=='${id}']`;
     client.fetch(query).then((data) => {
       setMovie(data);
-      console.log(data[0]);
       setMovieLoc(data[0].moviedetails.map((x) => x.locationame));
+      setLoc(data[0].moviedetails[0].locationame);
     });
   }, []);
   const handleChange = (value) => {
@@ -26,37 +26,93 @@ export function Detailpage() {
     <div style={{ display: "flex" }}>
       <SideNavBar />
       {movie ? (
-        <>
-          <div style={{ padding: "24px" }}>
-            <h1>Name: {movie[0]?.name}</h1>
-            <h1>Cast: {movie[0]?.cast}</h1>
-            <h1>Language: {movie[0]?.language}</h1>
-            <h1>Genre:{movie[0]?.genre}</h1>
-            <img
-              src={urlFor(movie[0]?.imgUrl).width(200).url()}
-              alt={movie[0].name}
-            />
-            {console.log(movloc)}
-            <Select style={{ width: 120 }} onChange={handleChange}>
-              {movloc.map((x, y) => (
-                <Option value={x} key={y}>
-                  {x}
-                </Option>
-              ))}
-            </Select>
-          </div>
+        <div style={{ padding: "24px" }}>
           <div>
-            {useloc.length > 0 &&
-              movie[0].moviedetails
-                .filter((x) => x.locationame === useloc)[0]
-                .theatre.map((theatre, key) => (
-                  <div>
-                    {console.log(theatre)}
-                    <h1>{theatre.theatreName}</h1>
-                  </div>
-                ))}
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <img
+                src={urlFor(movie[0]?.imgUrl).width(200).url()}
+                alt={movie[0].name}
+                style={{ width: "150px", height: "150px" }}
+              />
+              <div style={{ marginLeft: "16px" }}>
+                <p>
+                  <span style={{ fontWeight: "bold" }}>Name : </span>
+                  {movie[0]?.name}
+                </p>
+                <p>
+                  <span style={{ fontWeight: "bold" }}>Cast : </span>
+                  {movie[0]?.cast}
+                </p>
+                <p>
+                  <span style={{ fontWeight: "bold" }}>Language : </span>
+                  {movie[0]?.language}
+                </p>
+                <p>
+                  <span style={{ fontWeight: "bold" }}>Genre : </span>
+                  {movie[0]?.genre}
+                </p>
+              </div>
+            </div>
+            <div style={{ marginTop: "24px" }}>
+              <div style={{ display: "flex" }}>
+                <i
+                  class="fa fa-map-marker"
+                  aria-hidden="true"
+                  style={{
+                    marginTop: "5px",
+                    color: "#1890ff",
+                    fontSize: "20px",
+                  }}
+                ></i>
+                <Select
+                  onChange={handleChange}
+                  style={{ marginLeft: "16px" }}
+                  placeholder="please select location"
+                  defaultValue={useloc}
+                >
+                  {movloc.map((x, y) => (
+                    <Option value={x} key={y}>
+                      {x}
+                    </Option>
+                  ))}
+                </Select>
+              </div>
+            </div>
+            <div>
+              {useloc.length > 0 &&
+                movie[0].moviedetails
+                  .filter((x) => x.locationame === useloc)[0]
+                  .theatre.map((theatre, key) => (
+                    <div
+                      style={{
+                        margin: "16px 0px",
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <p style={{ fontWeight: "bold", fontSize: "18px" }}>
+                          {theatre.theatreName}
+                        </p>
+                        <p style={{ fontWeight: "bold", fontSize: "18px" }}>
+                          {theatre.price}&#8377;{" "}
+                        </p>
+                      </div>
+                      <div>
+                        {theatre.timings.map((x, y) => (
+                          <Tag color="gold" key={y}>
+                            {x}
+                          </Tag>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+            </div>
           </div>
-        </>
+        </div>
       ) : (
         <></>
       )}

@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 import {
   Button,
   Space,
@@ -6,6 +7,7 @@ import {
   Typography,
   Form,
   Input,
+  message,
 } from "antd";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -16,10 +18,15 @@ export function MainPage() {
   const history = useNavigate();
   const [form] = Form.useForm();
   const [data, setData] = useState([]);
-
+  const [sortedInfo, setSortedInfo] = useState({});
+  const [filteredInfo, setFilteredInfo] = useState({});
   const [editingKey, setEditingKey] = useState("");
   const isEditing = (record) => record._id === editingKey;
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const handleChange = (pagination, filters, sorter) => {
+    setFilteredInfo(filters);
+    setSortedInfo(sorter);
+  };
   const showModal = () => {
     setIsModalOpen(true);
   };
@@ -29,24 +36,19 @@ export function MainPage() {
   useEffect(() => {
     const query = `*[_type=='movies']`;
     client.fetch(query).then((data) => {
-      console.log(data);
       setData(data);
     });
   }, []);
-  useEffect(() => {
-    console.log(data);
-  }, [data]);
   const updateData = (id, record) => {
     client
       .patch(id)
       .set(record)
       .commit()
-      .then((updated) => {
-        console.log("Movie Updated");
-        console.log(updated);
+      .then(() => {
+        message.success("Movie Updated");
       })
       .catch((err) => {
-        console.error("Oh no, the update failed: ", err.message);
+        message.error("Some Error Occured Please Try again");
       });
   };
 
@@ -100,13 +102,10 @@ export function MainPage() {
   const save = async (key) => {
     try {
       const row = await form.validateFields();
-      console.log(row);
       const newData = [...data];
-      console.log(newData);
       const index = newData.findIndex((item) => key === item._id);
       if (index > -1) {
         const item = newData[index];
-        console.log(item);
         newData.splice(index, 1, {
           ...item,
           ...row,
@@ -120,7 +119,7 @@ export function MainPage() {
         setEditingKey("");
       }
     } catch (errInfo) {
-      console.log("Validate Failed:", errInfo);
+      message.error("Some Error Occured");
     }
   };
   const columns = [
@@ -129,6 +128,11 @@ export function MainPage() {
       dataIndex: "name",
       key: "name",
       editable: true,
+      sorter: (a, b) => {
+        if (a.name === b.name) return 0;
+        return a.name > b.name ? 1 : -1;
+      },
+      sortOrder: sortedInfo.columnKey === "name" ? sortedInfo.order : null,
     },
     {
       title: "Cast",
@@ -141,15 +145,100 @@ export function MainPage() {
       dataIndex: "language",
       key: "language",
       editable: true,
+      sorter: (a, b) => {
+        if (a.language === b.language) return 0;
+        return a.language > b.language ? 1 : -1;
+      },
+      sortOrder: sortedInfo.columnKey === "language" ? sortedInfo.order : null,
+      filters: [
+        {
+          text: "Telugu",
+          value: "Telugu",
+        },
+        {
+          text: "Tamil",
+          value: "Tamil",
+        },
+        {
+          text: "Hindi",
+          value: "Hindi",
+        },
+        {
+          text: "Kannada",
+          value: "Kannada",
+        },
+        {
+          text: "Malayalam",
+          value: "Malayalam",
+        },
+        {
+          text: "English",
+          value: "English",
+        },
+        {
+          text: "Other",
+          value: "Other",
+        },
+      ],
+      onFilter: (value, record) => {
+        return record.language.includes(value);
+      },
+      filteredValue: filteredInfo.language || null,
     },
     {
       title: "Genre",
       dataIndex: "genre",
       key: "genre",
       editable: true,
+      filters: [
+        {
+          text: "Action",
+          value: "Action",
+        },
+        {
+          text: "Romance",
+          value: "Romance",
+        },
+        {
+          text: "Suspense Thriller",
+          value: "Suspense Thriller",
+        },
+        {
+          text: "Horror",
+          value: "Horror",
+        },
+        {
+          text: "Science Fiction",
+          value: "Science Fiction",
+        },
+        {
+          text: "Documentary",
+          value: "Documentary",
+        },
+        {
+          text: "Biopic",
+          value: "Biopic",
+        },
+        {
+          text: "Drama",
+          value: "Drama",
+        },
+        {
+          text: "Super Hero",
+          value: "Super Hero",
+        },
+        {
+          text: "History",
+          value: "History",
+        },
+      ],
+      onFilter: (value, record) => {
+        return record.genre.includes(value);
+      },
+      filteredValue: filteredInfo.genre || null,
     },
     {
-      title: "Locations",
+      title: "No of Locations",
       key: "locations",
       render: (_, record) => (
         <>{record.moviedetails ? record.moviedetails.length : 0}</>
@@ -163,7 +252,7 @@ export function MainPage() {
           <Button
             style={{
               color: "white",
-              backgroundColor: "#DF1827",
+              backgroundColor: "#1890ff",
               borderRadius: "0.3rem",
             }}
             onClick={() => history(`/detail/${record._id}`)}
@@ -233,6 +322,7 @@ export function MainPage() {
             bordered
             columns={mergedColumns}
             rowClassName="editable-row"
+            onChange={handleChange}
             pagination={{
               onChange: cancel,
             }}
@@ -243,7 +333,7 @@ export function MainPage() {
           type="primary"
           style={{
             marginBottom: 16,
-            backgroundColor: "#DF1827",
+            backgroundColor: "#1890ff",
           }}
         >
           Add a movie

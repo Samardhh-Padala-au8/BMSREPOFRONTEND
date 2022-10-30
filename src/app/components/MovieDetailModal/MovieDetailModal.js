@@ -11,11 +11,11 @@ import {
   InputNumber,
   message,
 } from "antd";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { client } from "../../../client";
 import { ColorRing } from "react-loader-spinner";
-import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import images from "../../utils/images";
+import { useForm } from "rc-field-form";
 const { Option } = Select;
 export const MovieDetailModal = ({
   isModalOpen,
@@ -25,26 +25,80 @@ export const MovieDetailModal = ({
   setIsModalOpen,
 }) => {
   const [imagesAssets, setImagesAssets] = useState(null);
+  const [movLoad, setMovLoad] = useState(false);
   const [form] = Form.useForm();
-  // moviedetails: [
-  //   {
-  //     locationname: "Hyderabad",
-  //     theatre: [
-  //       {
-  //         theatrename: "Inox Gachibowli",
-  //         price: 100,
-  //         timings: ["12:00pm", "1:00pm", "4:00pm", "10:00pm"],
-  //       },
-  //     ],
-  //   },
-  // ],
-  // imgUrl: {
-  //   _type: "image",
-  //   asset: {
-  //     _type: "reference",
-  //     _ref: "image-752cc63bb6f1da01befe421452edf9b44e100703-1200x896-jpg",
-  //   },
-  // },
+  const LANGUAGE_OPTIONS = [
+    {
+      text: "Telugu",
+      value: "Telugu",
+    },
+    {
+      text: "Tamil",
+      value: "Tamil",
+    },
+    {
+      text: "Hindi",
+      value: "Hindi",
+    },
+    {
+      text: "Kannada",
+      value: "Kannada",
+    },
+    {
+      text: "Malayalam",
+      value: "Malayalam",
+    },
+    {
+      text: "English",
+      value: "English",
+    },
+    {
+      text: "Other",
+      value: "Other",
+    },
+  ];
+  const GENRE_OPTIONS = [
+    {
+      text: "Action",
+      value: "Action",
+    },
+    {
+      text: "Romance",
+      value: "Romance",
+    },
+    {
+      text: "Suspense Thriller",
+      value: "Suspense Thriller",
+    },
+    {
+      text: "Horror",
+      value: "Horror",
+    },
+    {
+      text: "Science Fiction",
+      value: "Science Fiction",
+    },
+    {
+      text: "Documentary",
+      value: "Documentary",
+    },
+    {
+      text: "Biopic",
+      value: "Biopic",
+    },
+    {
+      text: "Drama",
+      value: "Drama",
+    },
+    {
+      text: "Super Hero",
+      value: "Super Hero",
+    },
+    {
+      text: "History",
+      value: "History",
+    },
+  ];
   const TIMINGS = [
     "9:00am",
     "10:00am",
@@ -62,9 +116,7 @@ export const MovieDetailModal = ({
     "10:00pm",
     "11:00pm",
   ];
-  const [wrongTypeofImage, setWrongTypeofImage] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [setField] = useState();
   const uploadImage = (e) => {
     setLoading(true);
     const selectedImage = e.target.files[0];
@@ -75,7 +127,6 @@ export const MovieDetailModal = ({
       selectedImage.type === "image/gif" ||
       selectedImage.type === "image/tiff"
     ) {
-      setWrongTypeofImage(false);
       client.assets
         .upload("image", selectedImage, {
           contentType: selectedImage.type,
@@ -86,13 +137,14 @@ export const MovieDetailModal = ({
           setImagesAssets(document);
         })
         .catch((error) => {
-          console.log("Upload failed:", error.message);
+          message.error("Upload Failed Please Try again");
         });
     } else {
-      setWrongTypeofImage(true);
+      message.error("Please Upload Correct Format of image");
     }
   };
   const handleAdd = (values) => {
+    setMovLoad(true);
     if (imagesAssets?._id) {
       const obj = {
         ...values,
@@ -110,24 +162,34 @@ export const MovieDetailModal = ({
         .then((res) => {
           message.success("Successfully Added Movie");
           setData([...data, res]);
+          setMovLoad(false);
+          setIsModalOpen(false);
+          setImagesAssets(null);
+          form.resetFields();
         })
-        .catch((err) => console.log(err));
+        .catch(() => {
+          setMovLoad(false);
+          message.error("Some Error Occured Please Try again");
+          setImagesAssets(null);
+          form.resetFields();
+        });
     }
   };
   return (
     <>
       <Modal
-        title={
-          <Typography.Title level={2}>MOVIE DETAILS FORM</Typography.Title>
-        }
+        title={<Typography.Title level={3}>Movie Details</Typography.Title>}
         open={isModalOpen}
         onOk={handleAdd}
         onCancel={handleCancel}
         footer={null}
+        width={"70%"}
       >
         <div
           style={{
             display: "flex",
+            border: "1px solid #1890ff",
+            padding: "16px",
             justifyContent: "flex-start",
             width: "100%",
           }}
@@ -138,9 +200,10 @@ export const MovieDetailModal = ({
             onFinish={handleAdd}
             autoComplete="off"
             layout="vertical"
+            form={form}
           >
             <Row justify="space-between">
-              <Col span={24}>
+              <Col span={11}>
                 <Form.Item
                   name="name"
                   label="Movie Name"
@@ -151,7 +214,7 @@ export const MovieDetailModal = ({
                   <Input placeholder="Please enter movie name" />
                 </Form.Item>
               </Col>
-              <Col span={24}>
+              <Col span={11}>
                 <Form.Item
                   name="language"
                   label="Movie Language"
@@ -159,10 +222,16 @@ export const MovieDetailModal = ({
                     { required: true, message: "Please enter movie Language!" },
                   ]}
                 >
-                  <Input placeholder="Please enter movie Language" />
+                  <Select placeholder="Please select movie Language">
+                    {LANGUAGE_OPTIONS.map((x, y) => (
+                      <Option value={x.text} key={y}>
+                        {x.value}
+                      </Option>
+                    ))}
+                  </Select>
                 </Form.Item>
               </Col>
-              <Col span={24}>
+              <Col span={11}>
                 <Form.Item
                   name="genre"
                   label="Movie Genre"
@@ -170,10 +239,17 @@ export const MovieDetailModal = ({
                     { required: true, message: "Please enter movie genre!" },
                   ]}
                 >
-                  <Input placeholder="Please enter movie genre" />
+                  {/* <Input placeholder="Please enter movie genre" /> */}
+                  <Select placeholder="Please select movie genre">
+                    {GENRE_OPTIONS.map((x, y) => (
+                      <Option value={x.text} key={y}>
+                        {x.value}
+                      </Option>
+                    ))}
+                  </Select>
                 </Form.Item>
               </Col>
-              <Col span={24}>
+              <Col span={11}>
                 <Form.Item
                   name="cast"
                   label="Movie Cast"
@@ -189,7 +265,7 @@ export const MovieDetailModal = ({
                   <div style={{ display: "flex" }}>
                     <div>
                       <label for="file-upload" className="custom-file-upload">
-                        <span style={{ color: "#DF1827" }}>*</span> Upload Movie
+                        <span style={{ color: "red" }}>*</span> Upload Movie
                         Image
                       </label>
                       <input
@@ -218,38 +294,42 @@ export const MovieDetailModal = ({
                     )}
                   </div>
                 ) : (
-                  <>
-                    <Typography.Text>
+                  <div style={{ padding: "8px" }}>
+                    <p style={{ fontWeight: "bold" }}>
                       {imagesAssets.originalFilename}{" "}
                       <img
                         src={images.del}
                         alt=""
                         srcset=""
-                        style={{ cursor: "pointer" }}
+                        style={{
+                          cursor: "pointer",
+                          width: "15px",
+                          height: "15px",
+                        }}
                         onClick={() => setImagesAssets(null)}
                       />
-                    </Typography.Text>
-                  </>
+                    </p>
+                  </div>
                 )}
               </Col>
 
-              <Col style={{ marginTop: "24px" }} span={24}>
+              <Col span={24}>
                 <Form.List name="moviedetails">
                   {(fields, { add, remove }) => (
                     <>
                       {fields.map((field, index) => (
                         <div
                           style={{
-                            border: "1px solid black",
+                            border: "1px solid #1890ff",
                             width: "100%",
                             padding: "16px",
+                            marginTop: "16px",
                           }}
                         >
-                          {console.log(field)}
                           <Row justify="space-between">
                             <Col span={24}>
                               <div style={{ display: "flex" }}>
-                                <Typography.Title level={3}>
+                                <Typography.Title level={4}>
                                   Location Details
                                 </Typography.Title>
                                 <div>
@@ -269,7 +349,7 @@ export const MovieDetailModal = ({
                                 </div>
                               </div>
                             </Col>
-                            <Col span={24}>
+                            <Col span={12}>
                               <Form.Item
                                 label="Enter City Name"
                                 name={[field.name, "locationame"]}
@@ -294,12 +374,12 @@ export const MovieDetailModal = ({
                                     {fields.map((field, index2) => (
                                       <div
                                         style={{
-                                          border: "1px solid black",
+                                          border: "1px solid #1890ff",
                                           width: "100%",
                                           padding: "16px",
+                                          marginTop: "16px",
                                         }}
                                       >
-                                        {console.log(field)}
                                         <div style={{ display: "flex" }}>
                                           <Typography.Title level={5}>
                                             Theatre Details
@@ -320,8 +400,11 @@ export const MovieDetailModal = ({
                                             />
                                           </div>
                                         </div>
-                                        <Row justify="space-between">
-                                          <Col span={24}>
+                                        <Row
+                                          justify="space-between"
+                                          style={{ marginTop: "16px" }}
+                                        >
+                                          <Col span={12}>
                                             <Form.Item
                                               label="Enter Theatre Name"
                                               name={[field.name, "theatreName"]}
@@ -340,7 +423,7 @@ export const MovieDetailModal = ({
                                               <Input placeholder="Enter Theatre Name" />
                                             </Form.Item>
                                           </Col>
-                                          <Col span={24}>
+                                          <Col span={11}>
                                             <Form.Item
                                               label="Enter Ticket Price (Rupees)"
                                               name={[field.name, "price"]}
@@ -353,10 +436,7 @@ export const MovieDetailModal = ({
                                                 },
                                               ]}
                                             >
-                                              <InputNumber
-                                                placeholder="Enter Ticket Price"
-                                                min={100}
-                                              />
+                                              <InputNumber min={100} />
                                             </Form.Item>
                                           </Col>
                                           <Col span={24}>
@@ -446,6 +526,7 @@ export const MovieDetailModal = ({
                     type="primary"
                     htmlType="submit"
                     style={{ width: "100%" }}
+                    loading={movLoad}
                   >
                     ADD MOVIE
                   </Button>

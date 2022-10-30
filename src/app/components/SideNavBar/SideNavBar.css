@@ -1,10 +1,9 @@
 .side-nav-container {
   background-color: var(--dark);
   width: 300px;
-  height: 100vh;
+  min-height: 100vh;
   position: relative;
   color: var(--light);
-
   transition: 0.4s;
 }
 .side-nav-container-NX {
@@ -55,7 +54,7 @@ svg {
   margin: auto;
 }
 .menu-item:hover {
-  background-color: #df1827;
+  background-color: #1890ff;
   cursor: pointer;
 }
 
@@ -65,4 +64,7 @@ svg {
 .nav-details img {
   width: 50px;
   padding: 0 20px;
+}
+.anticon svg {
+  color: #1890ff;
 }

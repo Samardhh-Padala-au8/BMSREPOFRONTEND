@@ -1,28 +1,12 @@
+@import "~antd/dist/antd.css";
 :root {
-  --primary: #df1827;
+  --primary: #1890ff;
   --dark: #061b28;
   --gray: #756388;
   --light: #ffffff;
 }
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
-}
-
-.ant-pagination-item-active a {
-  color: #df1827 !important;
-}
-.ant-pagination-item-active {
-  border-color: #df1827 !important;
 }
 
 .editable-row .ant-form-item-explain {
