@@ -15,10 +15,11 @@ import React, { useState } from "react";
 import { client } from "../../../client";
 import { ColorRing } from "react-loader-spinner";
 import images from "../../utils/images";
+import { v4 as uuid } from "uuid";
 const { Option } = Select;
 export const MovieDetailModal = ({
   isModalOpen,
-  handleCancel,
+
   setData,
   data,
   setIsModalOpen,
@@ -148,6 +149,7 @@ export const MovieDetailModal = ({
       const obj = {
         ...values,
         _type: "movies",
+        _key: uuid(),
         imgUrl: {
           _type: "image",
           asset: {
@@ -173,6 +175,10 @@ export const MovieDetailModal = ({
           form.resetFields();
         });
     }
+  };
+  const handleCancel = () => {
+    setIsModalOpen(false);
+    form.resetFields();
   };
   return (
     <>

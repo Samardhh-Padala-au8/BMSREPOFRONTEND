@@ -13,6 +13,9 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { client } from "../../../client";
 import { SideNavBar, MovieDetailModal } from "../../components";
+import { LoadingOutlined } from "@ant-design/icons";
+import { Spin } from "antd";
+const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 
 export function MainPage() {
   const history = useNavigate();
@@ -23,6 +26,7 @@ export function MainPage() {
   const [editingKey, setEditingKey] = useState("");
   const isEditing = (record) => record._id === editingKey;
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const handleChange = (pagination, filters, sorter) => {
     setFilteredInfo(filters);
     setSortedInfo(sorter);
@@ -30,13 +34,13 @@ export function MainPage() {
   const showModal = () => {
     setIsModalOpen(true);
   };
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
+
   useEffect(() => {
+    setLoading(true);
     const query = `*[_type=='movies']`;
     client.fetch(query).then((data) => {
       setData(data);
+      setLoading(false);
     });
   }, []);
   const updateData = (id, record) => {
@@ -307,48 +311,62 @@ export function MainPage() {
       }),
     };
   });
-  return data ? (
+  return (
     <div style={{ display: "flex" }}>
       <SideNavBar />
-      <div style={{ padding: "24px" }}>
-        <Form form={form} component={false}>
-          <Table
-            components={{
-              body: {
-                cell: EditableCell,
-              },
-            }}
-            dataSource={data}
-            bordered
-            columns={mergedColumns}
-            rowClassName="editable-row"
-            onChange={handleChange}
-            pagination={{
-              onChange: cancel,
-            }}
-          />
-        </Form>
-        <Button
-          onClick={showModal}
-          type="primary"
+      {loading ? (
+        <div
           style={{
-            marginBottom: 16,
-            backgroundColor: "#1890ff",
+            display: "flex",
+            justifyContent: "center",
+            width: "100%",
+            alignItems: "center",
           }}
         >
-          Add a movie
-        </Button>
+          <Spin indicator={antIcon} />
+        </div>
+      ) : (
+        <div style={{ padding: "24px" }}>
+          <Form form={form} component={false}>
+            <Table
+              components={{
+                body: {
+                  cell: EditableCell,
+                },
+              }}
+              dataSource={data}
+              bordered
+              columns={mergedColumns}
+              rowClassName="editable-row"
+              onChange={handleChange}
+              pagination={{
+                onChange: cancel,
+              }}
+              loading={{
+                indicator: <Spin indicator={antIcon} />,
+                spinning: !data,
+              }}
+            />
+          </Form>
+          <Button
+            onClick={showModal}
+            type="primary"
+            style={{
+              marginBottom: 16,
+              backgroundColor: "#1890ff",
+            }}
+          >
+            Add a movie
+          </Button>
 
-        <MovieDetailModal
-          isModalOpen={isModalOpen}
-          handleCancel={handleCancel}
-          setData={setData}
-          data={data}
-          setIsModalOpen={setIsModalOpen}
-        />
-      </div>
+          <MovieDetailModal
+            isModalOpen={isModalOpen}
+            setData={setData}
+            data={data}
+            setIsModalOpen={setIsModalOpen}
+          />
+        </div>
+      )}
     </div>
-  ) : (
-    ""
   );
 }
