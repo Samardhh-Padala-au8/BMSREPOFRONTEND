@@ -174,6 +174,9 @@ export const MovieDetailModal = ({
           setImagesAssets(null);
           form.resetFields();
         });
+    } else {
+      message.warning("Image must be uploaded");
+      setMovLoad(false);
     }
   };
   const handleCancel = () => {
